@@ -1,0 +1,965 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="Icon" href="12.ico" type="image/x-icon">
+    <script type="application/javascript" src="js/script.js"></script>
+    <script type="application/javascript" src="js/sparkle.js"></script>
+    <script type="application/javascript" src="js/get touched.js"></script>|
+     <script type="application/javascript" src="js/log.js"></script>|
+    <title>KOMAR1K</title>
+    <style>
+
+
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        #overlay-text {
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(245, 245, 247, 0.9);
+            letter-spacing: 2px;
+            transition: transform 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        #play-button {
+            display: none; /* Den alten Button verstecken */
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            color: #ffffff;
+            line-height: 1.6;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            margin: 0;
+            position: relative;
+        }
+
+        /* Video Hintergrund */
+        /* Video Hintergrund - anfangs im Vordergrund */
+        #background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 10; /* Höherer z-index als der Container, aber niedriger als der Overlay */
+        }
+
+
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem 1rem;
+            background: rgba(0, 0, 0, 0.5); /* Background darken for contrast */
+            border-radius: 12px;
+            height: auto; /* Stellt sicher, dass die Höhe des Containers sich dem Inhalt anpasst */
+            margin-bottom: 2rem; /* Damit der Container nicht den gesamten verfügbaren Platz füllt */
+            perspective: 1000px;
+        }
+
+
+
+        /* Music control button styling */
+        #music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+
+        #music-toggle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+            #music-toggle:hover {
+                transform: scale(1.1);
+                background-color: rgba(255, 255, 255, 1);
+            }
+
+        #music-icon {
+            color: #000;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        /* Volume slider container */
+        #volume-container {
+            width: 0;
+            overflow: hidden;
+            transition: width 0.3s ease;
+            margin-right: 8px;
+        }
+
+        #music-control:hover #volume-container {
+            width: 100px;
+        }
+
+        /* Volume slider styling */
+        #volume-slider {
+            width: 100px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(37, 35, 35, 0.6);
+            border-radius: 3px;
+            outline: none;
+        }
+
+            #volume-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: rgb(61, 60, 60);
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+
+            #volume-slider::-moz-range-thumb {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: rgb(37, 37, 37);
+                cursor: pointer;
+                border: none;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+
+
+
+
+        /* Bio Card */
+        .bio-card {
+            background: linear-gradient(180deg, rgba(41, 41, 60, 0.6) 0%, rgba(28, 28, 40, 0.6) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 19px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            transform-style: preserve-3d;
+            transition: transform 0.08s ease-out;
+            transform: rotateX(0) rotateY(0);
+        }
+
+            .bio-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, #ffffff, #ffffff, #ffffff);
+                z-index: 2;
+            }
+
+        .bio-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 0px solid rgba(255, 255, 255, 0.3));
+            overflow: hidden;
+            position: relative;
+        }
+
+            .avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .profile-info h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(90deg, #FFFFFF, rgba(255, 255, 255, 0.3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-info p {
+            color: rgba(245, 245, 247, 0.8);
+            font-size: 0.95rem;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 1);
+        }
+
+        .bio-description {
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+            color: rgba(245, 245, 247, 0.9);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+
+            .stats-grid .stat-card:first-child .stat-value {
+                background: linear-gradient(to bottom, #ffffff, #000000);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+
+
+
+
+            .stats-grid .stat-card:first-child .stat-value {
+                color: #00ffcc;
+            }
+
+
+
+        .stat-card {
+            background: rgba(30, 30, 45, 0.6);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #9b87f5;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: rgba(245, 245, 247, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Games & Socials */
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: rgb(255, 255, 255, 0.8);
+            position: relative;
+            padding-left: 1rem;
+        }
+
+            .section-title::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 4px;
+                height: 16px;
+                background: #ffffff;
+                border-radius: 2px;
+            }
+
+        .games-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .game-card {
+            background: rgba(30, 30, 45, 0.6);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        
+
+          
+
+            .game-card:hover {
+                transform: translateY(-5px);
+                text-decoration: none;
+            }
+
+        .game-img {
+            height: 100px;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .game-info {
+            padding: 0.8rem;
+        }
+
+        .game-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .game-hours {
+            font-size: 0.8rem;
+            color: rgba(245, 245, 247, 0.7);
+        }
+
+        /* Socials */
+        .socials {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-link {
+            background: rgba(30, 30, 45, 0.6);
+            color: #F5F5F7;
+            text-decoration: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+            .social-link:hover {
+                background: #7E69AB;
+            }
+
+        .social-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Bio code section */
+        .code-section {
+            background: rgba(20, 20, 30, 0.8);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-title {
+            font-size: 0.9rem;
+            color: rgba(245, 245, 247, 0.7);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .copy-btn {
+            background: rgb(255, 255, 255, 0.5);
+            color: #000000;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .copy-btn:hover {
+                background: rgb(255, 255, 255, 0.9);
+            }
+
+        .code-content {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: rgba(245, 245, 247, 0.9);
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 0rem 0;
+            color: rgba(245, 245, 247, 0.6);
+            font-size: 0.85rem;
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .bio-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-info {
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .socials {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bio-card {
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .games-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+    <!-- Music control button with volume slider -->
+    <div id="music-control">
+        <div id="volume-container">
+            <input type="range" id="volume-slider" min="0" max="100" value="100" step="1">
+        </div>
+        <button id="music-toggle" aria-label="Toggle music">
+            <div id="music-icon">&#9658;</div>
+        </button>
+    </div>
+
+
+
+    <video autoplay muted loop id="background-video">
+        <source src="zib.mp3" type="audio/mp3">
+    </video>
+
+    <div id="musik-player">
+        <audio id="background-music" loop>
+            <source src="taiz.mp3" type="audio/mp3">
+        </audio>
+        <button id="play-button" onclick="playMusic()">▶️ Musik abspielen</button>
+    </div>
+    <div id="overlay" onclick="playMusic()">
+        <div id="overlay-text">CLICK ME</div>
+    </div>
+
+
+    <div class="container">
+        <div class="bio-card">
+            <div class="bio-header">
+                <div class="avatar">
+                    <img src="https://i.pinimg.com/736x/3a/eb/02/3aeb02951cf02ff2fe166e394bd735f2.jpg" alt="Gaming Profile" />
+                </div>
+                <div class="profile-info">
+                    <h1>KOMAR1K</h1>
+                    <p></p>
+                    <span class="tag">C++</span>
+                    <span class="tag">C#</span>
+                    <span class="tag">HTML</span>
+                    <span class="tag">Node.js</span>
+                    <span class="tag">Python</span>
+                    <span class="tag">JavaScript (PLugin, scripts)</span>
+                    <span class="tag">AHK (Scripts)</span>
+                </div>
+            </div>
+
+
+            <h2 class="section-title">TOP SECRET   </h2>
+            <div class="games-container">
+                <div class="games-list">
+                    
+                    <a href="https://www.zombo.com" class="game-card" target="_blank">
+                        <div class="game-title">Underground drug market</div>
+                        <div class="game-img" style="background-image: url('assets/pic.png');"></div>
+                    </a>
+                    
+                    <a href="https://tinyurl.com/5arrcupu" class="game-card" target="_blank">
+                        <div class="game-title">CIA.gov documents</div>
+                        <div class="game-img" style="background-image: url('assets/pic.png'); "></div>
+                    </a>
+                    
+                    
+                </div>
+            </div>
+
+            <h2 class="section-title">Portfolio</h2>
+            <div class="games-list">
+                <a href="https://about-komar1k.github.io/.bat" target="_blank" class="game-card">
+                    <img src="assets/port1.png" width="220" height="125">
+                    <div class="game-info">
+                        <div class="game-title">My favorite bio website</div>
+                        <div class="game-hours">Made in: 2 days </div>
+                        <div class="game-hours">Used plugins: Made by me</div>
+                        <div class="game-hours">Specials: had a logger before</div>
+                    </div>
+                </a>
+
+                <a href="https://komar-1k.github.io/purple-bio/" target="_blank" class="game-card">
+                    <img src="assets/port2.png" width="220" height="125">
+                    <div class="game-info">
+                        <div class="game-title">Made 12$/h</div>
+                        <div class="game-hours">Made in: 2.5h </div>
+                        <div class="game-hours">Used plugins: None</div>
+                        <div class="game-hours">Specials: None</div>
+                    </div>
+                </a>
+
+
+                
+            </div>
+                <a href="https://discord.com/users/1163585540118032426" class="social-link" target="_blank">
+                    <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 127.14 96.36" 
+                    width="45" 
+                    height="45" 
+                    fill="currentColor"
+                    className="text-gray-800"
+                  >
+                    <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+                  </svg>
+                  
+                    Discord
+                </a>
+
+            </p>
+            <a href="gitlink" class="social-link" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="black">
+                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 
+                      3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 
+                      0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61 
+                      -.546-1.387-1.333-1.757-1.333-1.757 
+                      -1.09-.745.084-.729.084-.729 
+                      1.205.084 1.84 1.236 1.84 1.236 
+                      1.07 1.835 2.809 1.304 3.495.997 
+                      .108-.776.418-1.305.76-1.605 
+                      -2.665-.3-5.467-1.335-5.467-5.93 
+                      0-1.31.468-2.38 1.236-3.22 
+                      -.124-.303-.535-1.523.117-3.176 
+                      0 0 1.008-.322 3.3 1.23 
+                      .96-.267 1.98-.399 3-.405 
+                      1.02.006 2.04.138 3 .405 
+                      2.28-1.552 3.285-1.23 3.285-1.23 
+                      .653 1.653.242 2.873.12 3.176 
+                      .77.84 1.23 1.91 1.23 3.22 
+                      0 4.61-2.807 5.625-5.48 5.92 
+                      .43.37.823 1.096.823 2.21 
+                      0 1.595-.015 2.88-.015 3.27 
+                      0 .315.21.694.825.576 
+                      C20.565 22.092 24 17.592 24 12.297 
+                      c0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                  
+                GitHub
+
+
+                <a href="https://steamcommunity.com/id/aspodkjwaud/" class="social-link" target="_blank">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 512 512"><path d="M478.8,208.2a36,36,0,1,1-36-36A36,36,0,0,1,478.8,208.2ZM442.6,139a69.42,69.42,0,0,0-69.4,68.7l-43.2,62a48.86,48.86,0,0,0-5.4-.3,51.27,51.27,0,0,0-26.4,7.3L102.4,198a51.8,51.8,0,1,0-50.6,62.9,51.27,51.27,0,0,0,26.4-7.3L274,332.2a51.76,51.76,0,0,0,102.1-5.9l66.5-48.6a69.35,69.35,0,1,0,0-138.7Zm0,22.9a46.45,46.45,0,1,1-46.5,46.5A46.54,46.54,0,0,1,442.6,161.9Zm-390.8,9a38.18,38.18,0,0,1,33.7,20.2l-18.9-7.6v.1a30.21,30.21,0,0,0-22.6,56v.1l16.1,6.4a36.8,36.8,0,0,1-8.2.9,38.05,38.05,0,0,1-.1-76.1ZM324.6,283.1A38.1,38.1,0,1,1,290.9,339c6.3,2.5,12.5,5,18.8,7.6a30.27,30.27,0,1,0,22.5-56.2L316.3,284A46.83,46.83,0,0,1,324.6,283.1Z"/></svg>
+                Steam
+                </a>
+
+
+            </a>
+            </div>
+
+            <h2 class="section-title">Other Bio</h2>
+            <div class="code-section">
+                <div class="code-header">
+                    <div class="code-title">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 3H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7.5L14 3H8z"></path>
+                            <polyline points="14 3 14 8 19 8"></polyline>
+                        </svg>
+                        Here you have another open src bio websites (GitHub)  (Click to Copy) -->
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard()">Copy</button>
+                </div>
+                <div class="code-content" id="bio-code">
+
+                    https://guns.lol/komar1k (guns.lol bio)
+                    --------------------------
+                    https://github.com/Komar-1k
+                    ------------------------------------------------*
+                    (it will copy everything tho)
+
+
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            &copy; 2025 CUSTOM BIO WEBSITE | Made By komar1k (KAMR1 dw)
+        </footer>
+    </div>
+
+    <script>
+
+
+
+        // Wait for the page to fully load
+        window.addEventListener('load', function () {
+            // Get the card element
+            const card = document.querySelector('.bio-card');
+
+            if (!card) return; // Exit if card not found
+
+            // Store the original box-shadow to restore it later
+            const originalShadow = window.getComputedStyle(card).boxShadow;
+
+            // Add enhanced shadow for 3D effect
+            card.style.boxShadow = originalShadow + ', 0 15px 40px rgba(0, 0, 0, 0.6)';
+            card.style.transition = 'transform 0.05s ease-out';
+
+            // Track mouse movement with reduced rotation angles
+            document.addEventListener('mousemove', function (e) {
+                // Calculate window center
+                const windowCenterX = window.innerWidth / 2;
+                const windowCenterY = window.innerHeight / 2;
+
+                // Calculate offsets from center (as percentage of window size)
+                const offsetX = (e.clientX - windowCenterX) / windowCenterX;
+                // Reduce vertical rotation by half for less extreme movement
+                const offsetY = (e.clientY - windowCenterY) / windowCenterY * 0.5;
+
+                // Convert to rotation angles (maximum 7 degrees instead of 10)
+                const rotateY = offsetX * 7;
+                const rotateX = -offsetY * 7; // Reduced and negative for natural direction
+
+                // Apply rotation
+                card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            // Reset rotation when mouse leaves window
+            document.addEventListener('mouseout', function (e) {
+                if (!e.relatedTarget) {
+                    card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
+                }
+            });
+
+            // Set up volume control
+            const volumeSlider = document.getElementById('volume-slider');
+            const music = document.getElementById('background-music');
+
+            if (volumeSlider && music) {
+                // Set initial volume
+                music.volume = volumeSlider.value / 100;
+
+                // Update volume when slider changes
+                volumeSlider.addEventListener('input', function () {
+                    music.volume = this.value / 100;
+                });
+
+                // Listen for the 'play' event to update the state properly
+                music.addEventListener('play', function () {
+                    isMusicPlaying = true;
+                });
+
+                // Listen for the 'pause' event to update the state properly
+                music.addEventListener('pause', function () {
+                    isMusicPlaying = false;
+                });
+            }
+
+            // Set up music toggle button
+            const musicToggle = document.getElementById('music-toggle');
+            if (musicToggle) {
+                musicToggle.addEventListener('click', toggleMusic);
+            }
+
+            // Set up overlay click
+            const overlay = document.getElementById('overlay');
+            if (overlay) {
+                overlay.addEventListener('click', function () {
+                    playMusic();
+                    // Also set the music playing state here
+                    isMusicPlaying = true;
+                });
+            }
+        });
+
+        // Globale Variable für den Musikstatus
+        let isMusicPlaying = false;
+
+        function toggleMusic() {
+            const music = document.getElementById('background-music');
+
+            if (!music.paused) {
+                // Wenn die Musik aktuell spielt, stoppe sie
+                music.pause();
+            } else {
+                // Wenn die Musik nicht spielt, starte sie
+                music.play()
+                    .then(() => {
+                        // Hide overlay if it's still visible
+                        const overlay = document.getElementById('overlay');
+                        if (overlay && overlay.style.display !== 'none') {
+                            overlay.style.display = 'none';
+
+                            // Move video to background
+                            const video = document.getElementById('background-video');
+                            if (video) {
+                                video.style.zIndex = "-1";
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error playing music:", error);
+                    });
+            }
+        }
+
+        function playMusic() {
+            const music = document.getElementById('background-music');
+            const video = document.getElementById('background-video');
+
+            music.play()
+                .then(() => {
+                    // Hide overlay
+                    const overlay = document.getElementById('overlay');
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                    }
+
+                    // Move video to background
+                    if (video) {
+                        video.style.zIndex = "-1";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error playing music:", error);
+                });
+        }
+
+
+
+
+        // Wait for the page to fully load
+        window.addEventListener('load', function () {
+            // Get the card element
+            const card = document.querySelector('.bio-card');
+
+            if (!card) return; // Exit if card not found
+
+            // Store the original box-shadow to restore it later
+            const originalShadow = window.getComputedStyle(card).boxShadow;
+
+            // Add enhanced shadow for 3D effect
+            card.style.boxShadow = originalShadow + ', 0 15px 40px rgba(0, 0, 0, 0.6)';
+            card.style.transition = 'transform 0.05s ease-out';
+
+            // Track mouse movement with greatly reduced vertical rotation
+            document.addEventListener('mousemove', function (e) {
+                // Calculate window center
+                const windowCenterX = window.innerWidth / 2;
+                const windowCenterY = window.innerHeight / 2;
+
+                // Calculate offsets from center (as percentage of window size)
+                const offsetX = (e.clientX - windowCenterX) / windowCenterX;
+                // Reduce vertical rotation by 75% for much less extreme movement
+                const offsetY = (e.clientY - windowCenterY) / windowCenterY * 0.75;
+
+                // Convert to rotation angles (maximum 5 degrees horizontally, 3 degrees vertically)
+                const rotateY = offsetX * 5;
+                const rotateX = -offsetY * 4; // Much more reduced vertical movement
+
+                // Apply rotation
+                card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            // Reset rotation when mouse leaves window
+            document.addEventListener('mouseout', function (e) {
+                if (!e.relatedTarget) {
+                    card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
+                }
+            });
+
+            // Rest of your code stays the same...
+        });
+
+
+        function playMusic() {
+            const music = document.getElementById('background-music');
+            const video = document.getElementById('background-video');
+
+            music.play()
+                .then(() => {
+                    // Wenn die Musik erfolgreich startet, Overlay ausblenden
+                    document.getElementById('overlay').style.display = 'none';
+
+                    // Video in den Hintergrund verschieben
+                    video.style.zIndex = "-1";
+
+                    // NICHT die Container-z-index ändern, nur Video in den Hintergrund
+                    // document.querySelector('.container').style.zIndex = "20"; -- entfernen
+                })
+                .catch(error => {
+                    console.error("Fehler beim Abspielen der Musik:", error);
+                });
+        }
+
+
+        function copyToClipboard() {
+            const codeContent = document.getElementById('bio-code');
+
+            // Verwende die moderne Clipboard API statt eines textarea Elements
+            navigator.clipboard.writeText(codeContent.textContent.trim())
+                .then(() => {
+                    // Nur bei Erfolg den Button-Text ändern
+                    const copyBtn = document.querySelector('.copy-btn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Fehler beim Kopieren: ', err);
+                });
+        }
+    </script>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Initial Title</title>
+</head>
+<body>
+    <h1>Dynamic Title Loop</h1>
+
+    <script>
+        const titles = [
+            "K",
+            "K4",
+            "K4M",
+            "K4MR",
+            "K4MR1",
+            "K4MR",
+            "K4M",
+            "K4",
+            "K",
+            "",
+            "K",
+            "KO",
+            "KOM",
+            "KOMA",
+            "KOMAR",
+            "KOMAR1",
+            "KOMAR1K",
+            "KOMAR1",
+            "KOMAR",
+            "KOMA",
+            "KOM",
+            "KO",
+            "K",
+            "",
+
+        ];
+        
+        let index = 0;
+
+        setInterval(() => {
+            document.title = titles[index];
+            index = (index + 1) % titles.length; 
+        }, 1000); 
+    </script>
+</body>
+</html>
